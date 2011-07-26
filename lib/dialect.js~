@@ -57,50 +57,6 @@ module.exports = function (options) {
     return DIALECT;
   };
 
-  /*
-   * Get a get static for a given locale.
-   */
-  DIALECT.getStatic = function (locale) {
-    return function(original) {
-      var translation = null,
-          key = null,
-          current_dictionary = DIALECT.dictionaries[locale],
-          params = Array.isArray(original) ? original.pop() : {},
-          needs_plural = Array.isArray(original) && original.length === 2,
-          index =  Array.isArray(original) ? original[0] : original,
-          pluralize = require('./helpers/plurals')(_options.base_locale);
-
-      if ((typeof original !== 'string' && !Array.isArray(original)) || original.length === 0) {
-        throw Error("Original is not valid");
-      }
-
-      if (!current_dictionary || _options.base_locale === locale) {
-        return _parse(needs_plural ? original[pluralize(params.count)] : index, params);
-      } else {
-
-        key = _io.getKeyFromQuery({
-          original: index,
-          count: params.count,
-          context: params.context
-        });
-
-        if (Object.keys(current_dictionary).length > 0) {
-          translation = current_dictionary[key];
-        }
-
-        if (typeof translation !== 'string') {
-          DIALECT.store.add(
-            {original: index, locale: locale},
-            translation
-          );
-          return _parse(needs_plural ? original[pluralize(params.count)] : index, params);
-        } else {
-          return _parse(translation, params);
-        }
-
-      }
-    }
-  };
 
   /**
    * Get a translation from the memory cache.
